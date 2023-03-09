@@ -18,6 +18,7 @@ int main(int argc, char* argv[])
 {
   try
   {
+    //Checks if program was executed with correct number of arguments (Perhaps one forgot to state the ip..?:) ) 
     if (argc != 2)
     {
       std::cerr << "Usage: client <host>" << std::endl;
@@ -26,10 +27,12 @@ int main(int argc, char* argv[])
 
     boost::asio::io_context io_context;
 
+    //Resolver makes sure the ip given as an argument is correctly handled as a list of endpoint objects.
     tcp::resolver resolver(io_context);
     tcp::resolver::results_type endpoints =
       resolver.resolve(argv[1], "daytime");
 
+    //Connects socket object to the created endpoint.
     tcp::socket socket(io_context);
     boost::asio::connect(socket, endpoints);
 
@@ -38,6 +41,7 @@ int main(int argc, char* argv[])
       boost::array<char, 128> buf;
       boost::system::error_code error;
 
+      //Reads data from server and inserts in 'buf' array.. Includes error code to be read before buffer is interpreted.
       size_t len = socket.read_some(boost::asio::buffer(buf), error);
 
       if (error == boost::asio::error::eof)
@@ -45,6 +49,7 @@ int main(int argc, char* argv[])
       else if (error)
         throw boost::system::system_error(error); // Some other error.
 
+      //Writes data read from server to the console, using std::cout.
       std::cout.write(buf.data(), len);
     }
   }
